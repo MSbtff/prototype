@@ -1,16 +1,32 @@
-// class Person {
-//     name = 'Max';
-
-//     constructor() {
-//         this.age = 30;
-//     }
-
-//     greet() {
-//         console.log(
-//             'Hi, I am ' + this.name + ' and I am ' + this.age + ' years old.'
-//         )
-//     }
+// class AgedPerson {
+//   printAge() {
+//     console.log(this.age);
+//   }
 // }
+// //클래스와 extends에서도 프로토타입을 사용할 수 있음
+// // 그래야 기본 클래스를 상속하여 모든 클래스에서 작동하기위해서
+// // Person 객체의 프로토타입이 AgedPerson 객체에 설정이 된 것
+// // Person이 super를 호출한 이유도 설명이 됨 AgedPerson 클래스에 기반해 객체를 만들고
+// // 이 클래스를 기반으로 만든 객체의 프로토타입으로 설정하는 것
+
+// class Person extends AgedPerson {
+//   name = 'Max';
+
+//   constructor() {
+//     super();
+//     this.age = 30;
+//   }
+
+//   greet() {
+//     console.log(
+//       'Hi, I am ' + this.name + ' and I am ' + this.age + ' years old.'
+//     );
+//   }
+// }
+
+Person.prototype.printAge = function () {
+  console.log(this.age);
+};
 
 function Person() {
   this.age = 30;
@@ -22,23 +38,29 @@ function Person() {
   };
 }
 
-Person.prototype = {
-  printAge() {
-    console.log(this.age);
-  },
-}; // 밑에서는 실행이 안됨? 왜 선언 순서가 중요한거 같은데 이유를 모르겠음
+//여기에는 추가 되지 않음 정적메서드와 프로퍼티가 이거는 생성자 함수가 아니기때문
+//위에 Person은 생성자 함수이기에 정적메서드와 프로퍼티가 생성이 됨
+Person.describe = function () {
+  console.log('Creating persons...');
+};
+
+// Person.prototype = {
+//   printAge() {
+//     console.log(this.age);
+//   },
+// }; // 밑에서는 실행이 안됨? 왜 선언 순서가 중요한거 같은데 이유를 모르겠음
 // p 객체를 만들고 나서 안됨
 /*
-p.printAge()가 정의되지 않는 이유는 
-Person.prototype 객체에 printAge() 메서드가 추가되기 전에 p 객체를 생성했기 때문입니다.
-즉, p 객체는 Person 생성자 함수를 통해 생성될 때 
-Person.prototype 객체의 프로퍼티와 메서드를 상속받았습니다. 
-이 때 Person.prototype 객체에는 printAge() 메서드가 포함되어 있지 않았기 때문에
- p.printAge()는 정의되지 않습니다.
-따라서 Person.prototype 객체에 printAge() 메서드를 추가한 후에 
-p.printAge()를 호출하면 원하는 결과를 얻을 수 있습니다.
-또는 p 객체를 새로 생성하여 Person.prototype 객체에 추가된 메서드를 상속받은 새로운 객체를 만들 수 있음
-*/
+    p.printAge()가 정의되지 않는 이유는 
+    Person.prototype 객체에 printAge() 메서드가 추가되기 전에 p 객체를 생성했기 때문입니다.
+    즉, p 객체는 Person 생성자 함수를 통해 생성될 때 
+    Person.prototype 객체의 프로퍼티와 메서드를 상속받았습니다. 
+    이 때 Person.prototype 객체에는 printAge() 메서드가 포함되어 있지 않았기 때문에
+    p.printAge()는 정의되지 않습니다.
+    따라서 Person.prototype 객체에 printAge() 메서드를 추가한 후에 
+    p.printAge()를 호출하면 원하는 결과를 얻을 수 있습니다.
+    또는 p 객체를 새로 생성하여 Person.prototype 객체에 추가된 메서드를 상속받은 새로운 객체를 만들 수 있음
+    */
 
 const p = new Person(); // 생성자 함수와 같은 역할
 
@@ -79,6 +101,30 @@ console.log(p.__proto__ === Person.prototype); // true 이 말은 생성자 함�
 // 프로토타입(prototype)은 완전히 다른거 모든 객체에 존재 하지 않음 함수 객체에만 존재
 // 우리가 원하는 무언가를 프로토타입에 설정할 때 생성자 함수에 기초하여 구축된 객체에 프로토타입으로 할당
 // prototype에는 생성자 함수가 할당되어 있고
-
 // 프로토타입 내의 this는 메서드를 호출하는 객체를 의미
+
 p.printAge(); // 30
+console.log(p.__proto__); // Person { printAge: [Function: printAge] }
+console.log(p.toString()); // [object Object]
+//프로토타입으로 연결돼 끝으로 가면 객체 생성자 함수에서 찾을 수 있음
+
+const p2 = new p.__proto__.constructor();
+//너무 복잡하고 앱이 생성자 함수에 바로 액세스할 수 없을때 사용
+
+console.log(p2);
+
+console.dir(Object.prototype); //정적 메서드와 정적 특성(프로퍼티)을 보여줌
+// 중요한점은 Object는 폴백 객체나 폴백 프로토타입이 아님 이둘은 다시 돌아갈 수 있음
+// 전역 객체 생성자 함수는 모든 것의 폴백 객체가 아님
+// 모든 객체의 폴백 값은 Object.prototype임
+
+// prototype 프로퍼티는 모든 것 즉 생성자 함수에 존재하고 Object 그냥 생성자 함수임
+
+// js에서나 객체 리터럴 표기법으로 만든 객체는 전역 Object 생성자 함수를 사용하는데
+// 기본적으로 javascript로 생성된 객체는 기본 prototype을 가짐 이것이 Object 함수에 기반한 것
+// 이 prototype을 폴백 객체로 사용함 그래서 모든 객체는 기본적으로 이걸 폴백 값으로 사용하는데
+// 여기엔 생성자 함수를 위해 얻을 수 있는 기본 프로토타입 개체도 포함
+
+// prototype은 생성자 함수에만 존재하고 __proto__는 모든 객체에 존재
+console.dir(Object.prototype.__proto__); // null
+// 왜냐 Object의 __proto__이 끝나기 때문
